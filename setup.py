@@ -16,7 +16,7 @@ from torsion_shape_gen import torsion_shape_gen
 ##### Put variables as a list of strings ######
 
 var_list_str = []
-parameter_list_str = ['L', 'EE', 'II', 'rho', 'A', 'm', 'G', 'J', 'x_f', 'V_inf', 'e', 'M_theta']
+parameter_list_str = ['L', 'EE', 'II', 'rho', 'A', 'm', 'G', 'J', 'x_f', 'V_inf', 'e', 'M_theta', 'c']
 others = ['y']
 
 ########## DEFINE VARIABLE STRINGS ############
@@ -56,7 +56,7 @@ delta_var_list_str = [*delta_q_bending, *delta_q_bending_dot, *delta_q_torsion, 
 
 IC = []
 # Assuming r = 10cm = 0.1m
-parameter_IC = [1.0, 10**6, 0.75*10**(-4), 1,225, 3.14*10**(-2), 6.0, 3.75*10**6, 0.75*10**(-4), 0.5, 10, 0.3, 0.3]
+parameter_IC = [1.0, 10**6, 0.75*10**(-4), 1,225, 3.14*10**(-2), 6.0, 3.75*10**6, 0.75*10**(-4), 0.5, 10, 0.3, 0.3, 1.0]
 
 q_IC = []
 for i in range(10):

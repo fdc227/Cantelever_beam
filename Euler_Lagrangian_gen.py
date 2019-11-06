@@ -12,6 +12,7 @@ delta_var_list_str, W_raw_list = delta_list[0], delta_list[1]
 
 T_raw = open('T_raw.pkl', 'rb')
 T_raw_list = pickle.load(T_raw)
+# print(T_raw_list)
 U_raw = open('U_raw.pkl', 'rb')
 U_raw_list = pickle.load(U_raw)
 
@@ -36,6 +37,7 @@ for n in range(T_num):
             T_str_replace = T_str_copy.replace(term, T_replace_dict[term][i])
             T_str_copy = T_str_replace
         T_string_list.append(T_str_copy)
+# print(T_string_list)
 
 for n in range(U_num):
     U_str_pre = U_raw_list[n][0]
@@ -67,10 +69,10 @@ for n in range(W_num):
 t = symbols('t')
 var_list_func = []
 for i in var_list_str:
-    j = i[0:-3]
-    globals()[j] = Function(j)(t)
-    var_list_func.append(globals()[j])
-# print(var_list_func)
+    globals()[i] = Function(i)(t)
+    var_list_func.append(globals()[i])
+print(variable_list_str)
+print(var_list_func)
 
 ###### Creating the list of symbolic representation of the symbols corresponding to their functions #######
 var_list_sym = []
@@ -105,7 +107,7 @@ for i in var_list_str:
     var_list_dt_dt.append(globals()[j])
 
 ###### Sympify parameters #######
-
+print(parameter_list_str)
 for i in parameter_list_str:
     globals()[i] = symbols(i)
 
@@ -130,7 +132,10 @@ replacement_map = {**var_func_to_sym, **var_list_raw_to_sym_dt, **var_list_raw_t
 
 def T_gen(i):
     T_eq_pre = sympify(T_string_list[i])
-    T_eq = T_eq_pre.doit()
+    print(T_eq_pre)
+    T_eq_un = T_eq_pre.doit()
+    print(T_eq_un)
+    T_eq = T_eq_un.xreplace(replacement_map)
     print(f'T term {i+1}/{len(T_string_list)} generated')
     output = []
     for j in var_list_dt_raw:
@@ -153,7 +158,7 @@ def W_gen(i):
     W_eq_pre = sympify(W_string_list[i])
     W_eq_un = W_eq_pre.doit()
     W_eq = W_eq_un.xreplace(replacement_map)
-    print(W_eq)
+    # print(W_eq)
     print(f'U_term {i+1}/{len(W_string_list)} generated')
     output = []
     for j in delta_variables_sym:
@@ -165,10 +170,14 @@ p = Pool(len(T_string_list))
 T_r = [r for r in range(len(T_string_list))]
 U_r = [r for r in range(len(U_string_list))]
 W_r = [r for r in range(len(W_string_list))]
-T_list = p.map(T_gen, T_r)
+# T_list = p.map(T_gen, T_r)
 U_list = p.map(U_gen, U_r)
 W_list = p.map(W_gen, W_r)
-# print(U_list)
+
+T_list = []
+for i in T_r:
+    T_list.append(T_gen(i))
+print(T_list)
 
 T_final = []
 for j in range(len(T_list[0])):
