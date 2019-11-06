@@ -9,6 +9,13 @@ from torsion_shape_gen import torsion_shape_gen
 # and the assumptions object that holds a list of supported ask keys (such as Q.real), respectively.'
 # copied from https://docs.sympy.org/latest/gotchas.html
 
+##############################################
+#### IMPORTANT SPECFICATION FOR VARIABLES ####
+##############################################
+
+# IF VARIABLES ARE FUNCTIONS OF TIME T, THEN WRITE THE VARIABLES AS Q(T) IN THE STRING LITERAL FOR FUNCTION EXPRESSIONS
+# THE VAR_STRING_LIST SHOULD ALL CONTAIN VARIABLES OF TIME T IN THE ABOVE FORMAT
+
 ###############################################
 ###########     USER DEFINITION      ##########
 ###############################################
@@ -26,13 +33,25 @@ q_bending_dot = []
 q_torsion = []
 q_inplane = []
 q_inplane_dot = []
+for i in range(1, 11):    # If variables are taken derivative with respect to time t at sympify and doit stage, the variable string literals must be in function of t format
+    q_bending.append(f'q{i}_b(t)')
+    q_bending_dot.append(f'q{i}_b_dot(t)')
+    q_torsion.append(f'q{i}_t(t)')
+    q_inplane.append(f'q{i}_i(t)')
+    q_inplane_dot.append(f'q{i}_i_dot(t)')
+    # q_torsion_funct.append(f'q{i}_t(t)')
 
-for i in range(1, 11):
-    q_bending.append(f'q{i}_b')
-    q_bending_dot.append(f'q{i}_b_dot')
-    q_torsion.append(f'q{i}_t')
-    q_inplane.append(f'q{i}_i')
-    q_inplane_dot.append(f'q{i}_i_dot')
+# q_bending_sym = []
+# q_bending_dot_sym = []
+# q_torsion_sym = []
+# q_inplane_sym = []
+# q_inplane_dot_sym = []
+# for i in range(1, 11):    
+#     q_bending_sym.append(f'q{i}_b')
+#     q_bending_dot_sym.append(f'q{i}_b_dot')
+#     q_torsion_sym.append(f'q{i}_t')
+#     q_inplane_sym.append(f'q{i}_i')
+#     q_inplane_dot_sym.append(f'q{i}_i_dot')
 
 var_list_str = [*q_bending, *q_bending_dot, *q_torsion, *q_inplane, *q_inplane_dot]
 
@@ -82,6 +101,7 @@ IC = [q_IC, parameter_IC]
 
 x, y = symbols('x, y')
 L = symbols('L')
+t = symbols('t')
 shapes = shape_gen(4)
 beam_shapes = []
 for term in shapes:
@@ -99,7 +119,8 @@ fi = beam_shapes[0]*k7 + beam_shapes[1]*k8 + beam_shapes[2]*k9 + beam_shapes[3]*
 delta_fb = beam_shapes[0]*p1 + beam_shapes[1]*p2 + beam_shapes[2]*p3 + beam_shapes[3]*p4
 delta_ft = torsion_shapes[0]*p5 + torsion_shapes[1]*p6
 
-T_func_f_format = f'Integral(1/2*m*(c-2*c*x_f)*Derivative({ft},(t,2))**2 + 1/2*m*(Derivative({fb},(t,2))**2+Derivative({fi},(t,2))**2), (y, 0, L))'
+# T_func_f_format = f'Integral(1/2*m*(c**2 - 2 * c * x_f )*Derivative({ft},(t,2))**2+1/2*m*(Derivative({fb},(t,2))**2+Derivative({fi},(t,2))**2), (y, 0, L))'
+T_func_f_format = f'Integral(1/2*m*(c**2-2*c*x_f)*Derivative({ft},t)**2+1/2*m*(Derivative({fb},t)**2+Derivative({fi},t)**2), (y, 0, L))'
 U_func_f_format = f'Integral(1/2*EE*II*(Derivative({fb},(y,2))**2+Derivative({fi},(y,2))**2) + 1/2*G*J*Derivative({ft},y)**2, (y, 0, L))'
 alpha = f'Derivative({fb},t)/(V_inf)+({ft})'
 dL = f'1/2*rho*V_inf**2*(2*3.14)*({alpha})'
@@ -116,7 +137,7 @@ q_inplane_T = q_inplane.copy()
 q_inplane_T.insert(0, '0')
 q_inplane_dot_T = q_inplane_dot.copy()
 q_inplane_dot_T.insert(0, '0')
-print(q_bending_T)
+# print(q_bending_T)
 
 delta_q_bending_T = delta_q_bending.copy()
 delta_q_bending_T.insert(0, '0')
@@ -128,7 +149,7 @@ delta_q_inplane_T = delta_q_inplane.copy()
 delta_q_inplane_T.insert(0, '0')
 delta_q_inplane_dot_T = delta_q_inplane_dot.copy()
 delta_q_inplane_dot_T.insert(0, '0')
-print(delta_q_bending_T)
+# print(delta_q_bending_T)
 
 T = [[T_func_f_format, {'k1':q_bending_T[0:10], 'k2':q_bending_dot_T[0:10], 'k3':q_bending_T[1:11], 'k4':q_bending_dot_T[1:11], 'k5':q_torsion_T[0:10], 'k6':q_torsion_T[1:11], 'k7':q_inplane_T[0:10], 'k8':q_inplane_dot_T[0:10], 'k9':q_inplane_T[1:11], 'p0':q_inplane_dot_T[1:11]}]]
 U = [[U_func_f_format, {'k1':q_bending_T[0:10], 'k2':q_bending_dot_T[0:10], 'k3':q_bending_T[1:11], 'k4':q_bending_dot_T[1:11], 'k5':q_torsion_T[0:10], 'k6':q_torsion_T[1:11], 'k7':q_inplane_T[0:10], 'k8':q_inplane_dot_T[0:10], 'k9':q_inplane_T[1:11], 'p0':q_inplane_dot_T[1:11]}]]

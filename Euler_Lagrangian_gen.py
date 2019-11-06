@@ -66,19 +66,23 @@ for n in range(W_num):
 # print(W_string_list)
 
 ###### Generating variables of functions that are callable by its symbol ########
+new_var_str = []
+for i in var_list_str:
+    new_var_str.append(i[0:-3])
+
 t = symbols('t')
 var_list_func = []
-for i in var_list_str:
+for i in new_var_str:
     globals()[i] = Function(i)(t)
     var_list_func.append(globals()[i])
-print(variable_list_str)
+# print(variable_list_str)
 print(var_list_func)
 
 ###### Creating the list of symbolic representation of the symbols corresponding to their functions #######
 var_list_sym = []
-for i in var_list_func:
-    var_list_sym.append(symbols(str(i)[0:-3]))
-# print(var_list_sym)
+for i in new_var_str:
+    var_list_sym.append(symbols(i))
+print(f'var_list_sym is :{var_list_sym}')
 
 delta_variables_sym = []
 for i in delta_var_list_str:
@@ -96,13 +100,13 @@ for i in var_list_func:
 
 ###### Creating symbolic dt variables #######
 var_list_dt = []
-for i in var_list_str:
-    j = i[0:-3]+'_dt'
+for i in new_var_str:
+    j = i +'_dt'
     globals()[j] = symbols(j)
     var_list_dt.append(globals()[j])
 var_list_dt_dt = []
-for i in var_list_str:
-    j = i[0:-3]+'_dt_dt'
+for i in new_var_str:
+    j = i +'_dt_dt'
     globals()[j] = symbols(j)
     var_list_dt_dt.append(globals()[j])
 
@@ -132,14 +136,11 @@ replacement_map = {**var_func_to_sym, **var_list_raw_to_sym_dt, **var_list_raw_t
 
 def T_gen(i):
     T_eq_pre = sympify(T_string_list[i])
-    print(T_eq_pre)
     T_eq_un = T_eq_pre.doit()
-    print(T_eq_un)
-    T_eq = T_eq_un.xreplace(replacement_map)
     print(f'T term {i+1}/{len(T_string_list)} generated')
     output = []
     for j in var_list_dt_raw:
-        eq = diff(diff(T_eq, j), t)
+        eq = diff(diff(T_eq_un, j), t)
         output.append(eq.xreplace(replacement_map))
     return output
 
@@ -170,14 +171,9 @@ p = Pool(len(T_string_list))
 T_r = [r for r in range(len(T_string_list))]
 U_r = [r for r in range(len(U_string_list))]
 W_r = [r for r in range(len(W_string_list))]
-# T_list = p.map(T_gen, T_r)
+T_list = p.map(T_gen, T_r)
 U_list = p.map(U_gen, U_r)
 W_list = p.map(W_gen, W_r)
-
-T_list = []
-for i in T_r:
-    T_list.append(T_gen(i))
-print(T_list)
 
 T_final = []
 for j in range(len(T_list[0])):
@@ -209,6 +205,7 @@ U_raw = open('U_final.pkl', 'wb')
 pickle.dump(U_final, U_raw)
 W_raw = open('W_final.pkl', 'wb')
 pickle.dump(W_final, W_raw)
+print(T_final)
 
 
 
